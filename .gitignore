@@ -1,0 +1,19 @@
+# input files
+*.csv
+*.xls*
+*.htm*
+old_imported/
+
+# env
+activate
+
+# python
+__pycache__
+*.pyc
+
+# secrets
+*secrets*
+
+# misc
+*.swp
+.DS_Store
