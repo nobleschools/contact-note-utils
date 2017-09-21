@@ -23,17 +23,17 @@ from elasticsearch_dsl import Search
 from simple_salesforce import Salesforce
 
 from common_date_formats import COMMON_DATE_FORMATS
-from constants import (
+from salesforce_utils.constants import (
     CAMPUS_SF_IDS,
     SALESFORCE_DATESTRING_FORMAT,
     ELASTIC_MATCH_SCORE,
 )
+from salesforce_utils.get_connection import get_salesforce_connection
 from header_mappings import HEADER_MAPPINGS
 from loggers.papertrail_logger import get_logger, SF_LOG_LIVE, SF_LOG_SANDBOX
 from salesforce_fields import contact_note as cn_fields
 from secrets.logging import SF_LOGGING_DESTINATION
 from secrets.elastic_secrets import ES_CONNECTION_KEY
-from secrets import salesforce_secrets
 
 
 campuses = CAMPUS_SF_IDS.keys()
@@ -306,26 +306,17 @@ if __name__=="__main__":
             log_addr, log_port, log_job_name, hostname=SF_LOG_SANDBOX,
         )
         logger.info("Connecting to sandbox Salesforce instance..")
-        sf_username = salesforce_secrets.SF_SANDBOX_USERNAME
-        sf_token = salesforce_secrets.SF_SANDBOX_TOKEN
     else:
         logger = get_logger(
             log_addr, log_port, log_job_name, hostname=SF_LOG_LIVE,
         )
         logger.info("Connecting to live Salesforce instance..")
-        sf_username = salesforce_secrets.SF_LIVE_USERNAME
-        sf_token = salesforce_secrets.SF_LIVE_TOKEN
 
     elastic_connection = es_connections.create_connection(
         hosts=[ES_CONNECTION_KEY], timeout=30
     )
 
-    sf_connection = Salesforce(
-        username=sf_username,
-        password=salesforce_secrets.SF_PASSWORD,
-        security_token=sf_token,
-        sandbox=args.sandbox,
-    )
+    sf_connection = get_salesforce_connection(sandbox=args.sandbox)
     upload_contact_notes(args.infile, campus, source_date_format)
 
     # ??
