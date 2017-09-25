@@ -110,7 +110,7 @@ def _query_for_safe_id(full_name, campus, es_connection=None):
         if match_index is not None: # could be 0th item
             match = strong_matches[match_index]
             matched_sf_id = match['_source']['safe_id']
-            print("Matched name '{}' with {}, {} ({}, Safe ID: {})".format(
+            print("Matched name '{}' with {}, {} ({}, Network ID: {})".format(
                 full_name, match['_source']['last_name'],
                 match['_source']['first_name'], match['_index'], match['_id']
             ))
@@ -121,7 +121,7 @@ def _query_for_safe_id(full_name, campus, es_connection=None):
     elif len(strong_matches) == 1: # one strong match found; accept
         match = strong_matches[0]
         matched_sf_id = match['_source']['safe_id']
-        print("Matched name '{}' with {}, {} ({}, Safe ID: {})".format(
+        print("Matched name '{}' with {}, {} ({}, Network ID: {})".format(
             full_name, match['_source']['last_name'],
             match['_source']['first_name'], match['_index'], match['_id']
         ))
@@ -132,7 +132,7 @@ def _query_for_safe_id(full_name, campus, es_connection=None):
         if match_index is not None: # could be 0th item
             match = weak_matches[match_index]
             matched_sf_id = match['_source']['safe_id']
-            print("Matched name '{}' with {}, {} ({}, Safe ID: {})".format(
+            print("Matched name '{}' with {}, {} ({}, Network ID: {})".format(
                 full_name, match['_source']['last_name'],
                 match['_source']['first_name'], match['_index'], match['_id']
             ))
