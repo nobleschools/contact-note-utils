@@ -18,6 +18,7 @@ HEADER_MAPPINGS = {
     "date of contact"          : cn_fields.DATE_OF_CONTACT,
     "initiated by alum"        : cn_fields.INITIATED_BY_ALUM,
     "method"                   : cn_fields.MODE_OF_COMMUNICATION,
+    "mode"                     : cn_fields.MODE_OF_COMMUNICATION,
     "mode of communication"    : cn_fields.MODE_OF_COMMUNICATION,
     "subject"                  : cn_fields.SUBJECT,
     # from persistence reports
