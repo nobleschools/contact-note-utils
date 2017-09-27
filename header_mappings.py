@@ -11,15 +11,18 @@ from salesforce_fields import contact_note as cn_fields
 HEADER_MAPPINGS = {
     "comments"                 : cn_fields.COMMENTS,
     "communication status"     : cn_fields.COMMUNICATION_STATUS,
+    "discussion category"      : cn_fields.DISCUSSION_CATEGORY,
     "successful?"              : cn_fields.COMMUNICATION_STATUS,
     "contact"                  : cn_fields.CONTACT,
     "safe_id"                  : cn_fields.CONTACT,
     "date"                     : cn_fields.DATE_OF_CONTACT,
     "date of contact"          : cn_fields.DATE_OF_CONTACT,
     "initiated by alum"        : cn_fields.INITIATED_BY_ALUM,
+    "initiated by alum?"       : cn_fields.INITIATED_BY_ALUM,
     "method"                   : cn_fields.MODE_OF_COMMUNICATION,
     "mode"                     : cn_fields.MODE_OF_COMMUNICATION,
     "mode of communication"    : cn_fields.MODE_OF_COMMUNICATION,
+    "mode of contact"          : cn_fields.MODE_OF_COMMUNICATION,
     "subject"                  : cn_fields.SUBJECT,
     # from persistence reports
     "sfid"                     : cn_fields.CONTACT,
