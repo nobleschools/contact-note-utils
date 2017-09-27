@@ -14,7 +14,7 @@ pytest==3.2.2
 python-dateutil==2.6.0
 pytz==2017.2
 requests==2.18.4
--e git+https://github.com/noblenetworkcharterschools/salesforce-utils.git@19febf99d5d52a46c5ef9556dc8664fafc5f7958#egg=salesforce_utils
+-e git+https://github.com/noblenetworkcharterschools/salesforce-utils.git@125c4531d0fb00d75ea1222993ea2c209a24a5e4#egg=salesforce_utils
 simple-salesforce==0.72.2
 six==1.11.0
 urllib3==1.22
