@@ -14,7 +14,7 @@ sys.path.insert(0, package_dir)
 from bs4 import BeautifulSoup as bs
 
 from header_mappings import FB_NOTE_HEADERS
-from constants import SALESFORCE_DATESTRING_FORMAT
+from salesforce_utils.constants import SALESFORCE_DATESTRING_FORMAT
 from salesforce_fields import contact_note as cn_fields
 
 # eg. Tuesday, November 22, 2016 at 10:36am CST
