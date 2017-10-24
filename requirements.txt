@@ -9,6 +9,7 @@ docutils==0.14
 elasticsearch==5.3.0
 elasticsearch-dsl==5.3.0
 idna==2.6
+-e git+https://github.com/noblenetworkcharterschools/noble-logging-utils.git@76b92725b566df07463c3460f82a46251e51b829#egg=noble_logging_utils
 py==1.4.34
 pycparser==2.18
 pyOpenSSL==17.3.0
@@ -20,4 +21,3 @@ requests==2.18.4
 simple-salesforce==0.72.2
 six==1.11.0
 urllib3==1.22
-XlsxWriter==0.9.7

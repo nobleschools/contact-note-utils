@@ -298,18 +298,13 @@ if __name__=="__main__":
 
     source_date_format = _request_source_date_format()
 
-    log_addr, log_port = SF_LOGGING_DESTINATION
     log_job_name = __file__.split(path.sep)[-1] # name of this file
 
     if args.sandbox:
-        logger = get_logger(
-            log_addr, log_port, log_job_name, hostname=SF_LOG_SANDBOX,
-        )
+        logger = get_logger(log_job_name, hostname=SF_LOG_SANDBOX)
         logger.info("Connecting to sandbox Salesforce instance..")
     else:
-        logger = get_logger(
-            log_addr, log_port, log_job_name, hostname=SF_LOG_LIVE,
-        )
+        logger = get_logger(log_job_name, hostname=SF_LOG_LIVE)
         logger.info("Connecting to live Salesforce instance..")
 
     elastic_connection = es_connections.create_connection(
