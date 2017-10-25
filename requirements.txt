@@ -9,7 +9,7 @@ docutils==0.14
 elasticsearch==5.3.0
 elasticsearch-dsl==5.3.0
 idna==2.6
--e git+https://github.com/noblenetworkcharterschools/noble-logging-utils.git@76b92725b566df07463c3460f82a46251e51b829#egg=noble_logging_utils
+-e git+https://github.com/noblenetworkcharterschools/noble-logging-utils.git@0d292d844aa372954fce5c3fc4cc61540f1d0f26#egg=noble_logging_utils
 py==1.4.34
 pycparser==2.18
 pyOpenSSL==17.3.0
@@ -17,7 +17,7 @@ pytest==3.2.2
 python-dateutil==2.6.0
 pytz==2017.2
 requests==2.18.4
--e git+https://github.com/noblenetworkcharterschools/salesforce-utils.git@125c4531d0fb00d75ea1222993ea2c209a24a5e4#egg=salesforce_utils
-simple-salesforce==0.72.2
+-e git+https://github.com/noblenetworkcharterschools/salesforce-utils.git@e1d3374aefb2c70c483f9ed13107d4a5800071b2#egg=salesforce_utils
+simple-salesforce==0.73.0
 six==1.11.0
 urllib3==1.22

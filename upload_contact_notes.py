@@ -11,12 +11,7 @@ and checks for duplicates using Date_of_Contact__c and Mode_of_Communication__c.
 import argparse
 import csv
 from datetime import datetime
-import sys
-from os import pardir, path
-filepath = path.abspath(__file__)
-parent_dir = path.abspath(path.join(filepath, pardir))
-package_dir = path.abspath(path.join(parent_dir, pardir))
-sys.path.insert(0, package_dir)
+from os import path
 
 from elasticsearch_dsl.connections import connections as es_connections
 from elasticsearch_dsl import Search
@@ -30,9 +25,13 @@ from salesforce_utils.constants import (
 )
 from salesforce_utils.get_connection import get_salesforce_connection
 from header_mappings import HEADER_MAPPINGS
-from loggers.papertrail_logger import get_logger, SF_LOG_LIVE, SF_LOG_SANDBOX
+from noble_logging_utils.papertrail_logger import (
+    get_logger,
+    SF_LOG_LIVE,
+    SF_LOG_SANDBOX,
+)
+#from noble_logging_utils.papertrail_logger import get_logger
 from salesforce_fields import contact_note as cn_fields
-from secrets.logging import SF_LOGGING_DESTINATION
 from secrets.elastic_secrets import ES_CONNECTION_KEY
 
 
@@ -175,7 +174,7 @@ def _string_to_bool(boolstring):
     elif boolstring == 'false':
         return False
 
-
+# TODO use salesforce_utils.make_salesforce_datestr
 def _convert_time_format(source_datestring, source_date_format):
     """
     Convert source_datestring in source_format to Salesforce-ready '%Y-%M-%d'.
@@ -290,7 +289,6 @@ def parse_args():
 
 
 if __name__=="__main__":
-
     args = parse_args()
 
     if not args.campus or args.campus.lower() in campuses:
