@@ -30,7 +30,6 @@ from noble_logging_utils.papertrail_logger import (
     SF_LOG_LIVE,
     SF_LOG_SANDBOX,
 )
-#from noble_logging_utils.papertrail_logger import get_logger
 from salesforce_fields import contact_note as cn_fields
 from secrets.elastic_secrets import ES_CONNECTION_KEY
 
