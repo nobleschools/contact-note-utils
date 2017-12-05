@@ -10,13 +10,6 @@ Write back out to csv; assumes a 'Full Name' column has been added already.
 import argparse
 import csv
 
-import sys
-from os import pardir, path
-filepath = path.abspath(__file__)
-parent_dir = path.abspath(path.join(filepath, pardir))
-package_dir = path.abspath(path.join(parent_dir, pardir))
-sys.path.insert(0, package_dir)
-
 # TODO parameterize
 FIRST_NAME_HEADER = 'First Name'
 LAST_NAME_HEADER = 'Last Name'
