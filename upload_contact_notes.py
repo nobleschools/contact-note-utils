@@ -23,7 +23,10 @@ from salesforce_utils.constants import (
     SALESFORCE_DATESTRING_FORMAT,
     ELASTIC_MATCH_SCORE,
 )
-from salesforce_utils.get_connection import get_salesforce_connection
+from salesforce_utils import (
+    get_salesforce_connection,
+    make_salesforce_datestr,
+)
 from header_mappings import HEADER_MAPPINGS
 from noble_logging_utils.papertrail_logger import (
     get_logger,
@@ -54,7 +57,7 @@ def upload_contact_notes(input_file, campus, source_date_format):
 
         for row in reader:
             # Date_of_Contact__c
-            datestring = _convert_time_format(
+            datestring = make_salesforce_datestr(
                 row[cn_fields.DATE_OF_CONTACT], source_date_format
             )
             row[cn_fields.DATE_OF_CONTACT] = datestring
@@ -172,34 +175,6 @@ def _string_to_bool(boolstring):
         return True
     elif boolstring == 'false':
         return False
-
-# TODO use salesforce_utils.make_salesforce_datestr
-def _convert_time_format(source_datestring, source_date_format):
-    """
-    Convert source_datestring in source_format to Salesforce-ready '%Y-%M-%d'.
-
-    If adding the year to the date, assumes we aren't uploading notes >1yr old,
-    thus
-        if contact month <= current month:
-            use current year
-        else:
-            use last year
-    """
-
-    source_dateobj = datetime.strptime(source_datestring, source_date_format)
-
-    if source_dateobj.year == 1900:
-        # year was not specified
-        today = datetime.today()
-        current_month, current_year = today.month, today.year
-        if source_dateobj.month <= current_month:
-            # assume same year
-            source_dateobj = source_dateobj.replace(year=current_year)
-        else:
-            # assume last year
-            source_dateobj = source_dateobj.replace(year=current_year-1)
-
-    return source_dateobj.strftime(SALESFORCE_DATESTRING_FORMAT)
 
 
 def check_for_existing_contact_note(datestring, alum_safe_id, subject):
