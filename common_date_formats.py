@@ -10,4 +10,6 @@ COMMON_DATE_FORMATS = (
     "%m/%d/%y", # from Facebook notes
     "%m/%d/%Y",
     "%Y-%m-%d", # Salesforce API-ready
+    "%m.%d.%y",
+    "%m.%d.%Y",
 )
