@@ -30,7 +30,7 @@ def clean_headers(source_file):
 
     with open(source_file, 'r') as source_csv:
         reader = csv.DictReader(source_csv)
-        source_headers = reader.fieldnames
+        source_headers = [f.strip() for f in reader.fieldnames]
         target_headers = list(map(
             lambda x: HEADER_MAPPINGS.get(x.lower(), x), source_headers
         ))
