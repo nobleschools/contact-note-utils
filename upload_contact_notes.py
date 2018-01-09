@@ -132,6 +132,8 @@ def check_for_existing_contact_note(datestring, alum_safe_id, subject):
         "AND Subject__c = '{}'"
     )
 
+    subject = subject.replace("'", r"\'")
+
     results = sf_connection.query(contact_note_query.format(
         datestring, alum_safe_id, subject
     ))
