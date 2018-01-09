@@ -1,28 +1,19 @@
 """
 upload_contact_notes.py
 
-Upload contact notes to Salesforce from a csv in either the persistence reports
-or Facebook notes format.
+Upload contact notes to Salesforce from a csv.
 
-Verifies Network ID against alum name and class year using Elastic,
-and checks for duplicates using Date_of_Contact__c and Mode_of_Communication__c.
+Checks for duplicates using Subject__c, Date_of_Contact__c and
+Mode_of_Communication__c fields.
+
+TODO Refactor with noble-salesforce-utils; confirm ID and name against Elastic.
 """
 
 import argparse
 import csv
-from datetime import datetime
 from os import path
 
-from elasticsearch_dsl.connections import connections as es_connections
-from elasticsearch_dsl import Search
-from simple_salesforce import Salesforce
-
 from common_date_formats import COMMON_DATE_FORMATS
-from salesforce_utils.constants import (
-    CAMPUS_SF_IDS,
-    SALESFORCE_DATESTRING_FORMAT,
-    ELASTIC_MATCH_SCORE,
-)
 from salesforce_utils import (
     get_salesforce_connection,
     make_salesforce_datestr,
@@ -34,16 +25,10 @@ from noble_logging_utils.papertrail_logger import (
     SF_LOG_SANDBOX,
 )
 from salesforce_fields import contact_note as cn_fields
-from secrets.elastic_secrets import ES_CONNECTION_KEY
 
 
-campuses = CAMPUS_SF_IDS.keys()
-
-
-def upload_contact_notes(input_file, campus, source_date_format):
-    """
-    Upload Contact Notes to Salesforce.
-    """
+def upload_contact_notes(input_file, source_date_format):
+    """Upload Contact Notes to Salesforce."""
     logger.info("Starting Contact Note upload..")
 
     COUNT_CONTACT_NOTES_QUERY = "SELECT COUNT() FROM Contact_Note__c"
@@ -63,14 +48,8 @@ def upload_contact_notes(input_file, campus, source_date_format):
             row[cn_fields.DATE_OF_CONTACT] = datestring
 
             # Contact__c
-            try:
-                safe_id = row[cn_fields.CONTACT]
-            except KeyError:
-                safe_id = get_safe_id(campus, **row)
-                if not safe_id:
-                    logger.warn("No Safe ID found for {}".format(row))
-                    continue
-                row[cn_fields.CONTACT] = safe_id
+            # TODO handle in a way that allows easy retried of any failed
+            safe_id = row[cn_fields.CONTACT]
 
             possible_dupe = check_for_existing_contact_note(
                 datestring, safe_id, row[cn_fields.SUBJECT]
@@ -105,51 +84,6 @@ def upload_contact_notes(input_file, campus, source_date_format):
     post_uploads_count = \
         sf_connection.query(COUNT_CONTACT_NOTES_QUERY)['totalSize']
     assert post_uploads_count == pre_uploads_count + created_count
-
-
-def get_safe_id(campus, **kwargs):
-    """
-    Get safe_id for alum from their Network ID and full name (ensuring
-    both match).
-
-    Returns str safe_id or None
-    """
-
-    # assumed...
-    full_name = kwargs['First Name'] + ' ' + kwargs['Last Name']
-    network_id = kwargs['Network ID']
-
-    safe_id_query = {
-        "min_score": ELASTIC_MATCH_SCORE,
-        "query": {
-            "bool": {
-                "must": [{
-                    "match": {
-                        "_id": {
-                            "query": network_id,
-                            "boost": 2,
-                        },
-                    },
-                }],
-                "should": [{
-                    "match": {
-                        "full_name": {
-                            "query": full_name,
-                            "fuzziness": 2,
-                        }
-                    }
-                }],
-            },
-        }
-    }
-    s = Search().from_dict(safe_id_query)
-    s = s.index(campus)
-    results = s.execute()
-
-    # no one match found; could return more info if multiple
-    if not len(results) == 1:
-        return None
-    return results[0].safe_id
 
 
 def _upload_note(args_dict):
@@ -207,24 +141,8 @@ def check_for_existing_contact_note(datestring, alum_safe_id, subject):
     return None
 
 
-def _request_campus():
-    """
-    If the relevant campus isn't passed as an argument to the script, prompt
-    user.
-    """
-    enumerated_campuses = dict(enumerate(campuses))
-
-    for position, campus_name in enumerated_campuses.items():
-        print("{}) {}".format(position, campus_name))
-    input_num = input("Enter number of campus to use to confirm alumni IDs: ")
-
-    return enumerated_campuses[int(input_num)] # or go down in flames
-
-
 def _request_source_date_format():
-    """
-    Prompt user for the datestring format in the input.
-    """
+    """Prompt user for the datestring format in the input."""
     enumerated_date_formats = dict(enumerate(COMMON_DATE_FORMATS))
 
     for position, date_format in enumerated_date_formats.items():
@@ -241,17 +159,10 @@ def parse_args():
                  Otherwise, connects to live
     """
 
-    parser = argparse.ArgumentParser(description=\
-        "Specify input csv file and campus"
-    )
+    parser = argparse.ArgumentParser(description="Specify input csv file")
     parser.add_argument(
         "infile",
         help="Input file (in csv format)"
-    )
-    parser.add_argument(
-        "--campus",
-        default=None,
-        help="Campus (index) the notes are for"
     )
     parser.add_argument(
         "--sandbox",
@@ -265,9 +176,6 @@ def parse_args():
 if __name__=="__main__":
     args = parse_args()
 
-    if not args.campus or args.campus.lower() in campuses:
-        campus = _request_campus()
-
     source_date_format = _request_source_date_format()
 
     log_job_name = __file__.split(path.sep)[-1] # name of this file
@@ -279,12 +187,8 @@ if __name__=="__main__":
         logger = get_logger(log_job_name, hostname=SF_LOG_LIVE)
         logger.info("Connecting to live Salesforce instance..")
 
-    elastic_connection = es_connections.create_connection(
-        hosts=[ES_CONNECTION_KEY], timeout=30
-    )
-
     sf_connection = get_salesforce_connection(sandbox=args.sandbox)
-    upload_contact_notes(args.infile, campus, source_date_format)
+    upload_contact_notes(args.infile, source_date_format)
 
     # ??
     logger.handlers[0].close()
