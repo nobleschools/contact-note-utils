@@ -27,10 +27,6 @@ MIN_SCORE_THRESHOLD = 2 # only return results from ES with this score or higher
 
 def write_salesforce_ids(input_filename, campus, name_headers):
 
-    headers_list = None
-    if len(name_headers.split(',')) > 1:
-        headers_list = name_headers.split(',')
-
     output_filename = "with_ids_{}".format(input_filename)
 
     with open(input_filename) as infile:
@@ -43,10 +39,10 @@ def write_salesforce_ids(input_filename, campus, name_headers):
 
             for row in reader:
                 if not row[cn_fields.CONTACT]:
-                    if headers_list:
-                        full_name = _make_full_name(row, headers_list)
+                    if len(name_headers) > 1:
+                        full_name = _make_full_name(row, name_headers)
                     else:
-                        full_name = row[name_headers]
+                        full_name = row[name_headers[0]]
                     row[cn_fields.CONTACT] = _query_for_safe_id(full_name, campus)
 
                 writer.writerow(row)
@@ -82,6 +78,8 @@ def _query_for_safe_id(full_name, campus, es_connection=None):
                         },
                     },
                 },
+                # can comment out this filter clause to search across all
+                # campuses in a pinch
                 "filter": { # es_scan doesn't respect aliases as faux indices
                     "term": {
                         "campus": campus,
@@ -187,10 +185,13 @@ def parse_args():
     parser.add_argument(
         '--nameheaders',
         default="Name",
+        nargs="+",
         help=("Name of header(s) to use for full name lookup. If "
-              "multiple, eg. 'FirstName' and 'LastName' columns, "
-              "argument may be a comma-separated list like "
-              "`FirstName,LastName` (must be first, last).")
+              "multiple - eg. 'First Name' and 'Last Name' columns - "
+              "arguments are expected to in first-to-last order "
+              "(though the search can generally match well in any order). "
+              "Defaults to a single header 'Name'."
+        ),
     )
     return parser.parse_args()
 
