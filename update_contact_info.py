@@ -18,18 +18,18 @@ from noble_logging_utils.papertrail_logger import (
 )
 from salesforce_utils import get_salesforce_connection
 from salesforce_fields import contact as contact_fields
-#from . import salesforce_secrets
 
 # TODO parameterize
 FIELDS_TO_UPDATE = (
-    #contact_fields.EMAIL,
-    contact_fields.MOBILE,
+    contact_fields.COLLEGE_GPA,
 )
 
 
 def update_contact_info(input_file, sf_connection):
-    """
-    Update Contact (alum) info in Salesforce from the input_file csv.
+    """Update Contact (alum) info in Salesforce from the input_file csv.
+
+    Looks for headers in FIELDS_TO_UPDATE.  If a cell is empty (''), skips that
+    field so as not to overwrite existing value.
     """
     logger.info("Starting Contact updates..")
 
