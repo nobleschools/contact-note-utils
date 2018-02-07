@@ -22,11 +22,12 @@ from noble_logging_utils.papertrail_logger import (
 
 SF_ID_HEADER = "Contact__c"
 FILE_NO_HEADER = "File number"
-TRANSCRIPTS_DIR = path.abspath("NLU Transcripts")
+TRANSCRIPTS_DIR = path.abspath("albion_transcripts")
+NAME_HEADER = "Name"
 
 
 def upload_transcripts(input_filename, sf_connection):
-    """Upload NLU transcript attachments to Salesforce Contacts.
+    """Upload transcript attachments to Salesforce Contacts.
     """
     #logger.info("Starting Attachment uploads..")
     print("Starting Attachment uploads..")
@@ -36,13 +37,15 @@ def upload_transcripts(input_filename, sf_connection):
 
         for row in reader:
             alum_sf_id = row[SF_ID_HEADER]
-            file_number = row[FILE_NO_HEADER]
-            attachment_filename = f"Noble 012018[1] {file_number}.pdf"
+            #file_number = row[FILE_NO_HEADER]
+            alum_name = row[NAME_HEADER]
+            #attachment_filename = f"Noble 012018[1] {file_number}.pdf"
+            attachment_filename = f"{alum_name}.pdf"
             filepath = path.join(TRANSCRIPTS_DIR, attachment_filename)
 
             result = push_attachment(
                 sf_connection, alum_sf_id, filepath,
-                target_filename="NLU Transcript JAN-2018.pdf"
+                target_filename="Albion Transcript JAN-2018.pdf"
             )
 
             print(result, alum_sf_id)
