@@ -8,20 +8,18 @@ field.
 import csv
 
 
-with open("Lawson_contact.csv", "r") as infile:
+with open("rivas_contactnotes.csv", "r") as infile:
     reader = csv.reader(infile)
     headers = next(reader)
 
-    with open("summarized_Lawson_contact.csv", "w") as outfile:
+    with open("summarized_rivas_contactnotes.csv", "w") as outfile:
         writer = csv.writer(outfile)
         writer.writerow(headers)
 
         for row in reader:
             comments = []
-            for i in range(8, len(row)):
-                comments.append(headers[i])
-                comments.append(row[i])
-            comments_blob = "\n".join(comments)
-            row.append(comments_blob)
-            row[0] = row[0].split()[0]
+            for i in range(3, 7):
+                comments.append(f"{headers[i]}\n{row[i]}")
+            comments_blob = "\n\n".join(comments)
+            row[7] = comments_blob
             writer.writerow(row)

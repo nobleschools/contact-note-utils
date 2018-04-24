@@ -22,6 +22,7 @@ from salesforce_fields import contact as contact_fields
 # TODO parameterize
 FIELDS_TO_UPDATE = (
     contact_fields.COLLEGE_GPA,
+    contact_fields.PERSISTENCE_STATUS,
 )
 
 

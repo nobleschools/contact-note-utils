@@ -1,7 +1,4 @@
 """
-add_owner_ids.py
-
-Query Elasticsearch using Safe ID and campus to write back out with OwnerId.
 """
 
 import argparse
@@ -27,9 +24,7 @@ FB_IGNORES_INDEX = "fb-ignore"
 
 def write_fb_ignores(csv_filename):
     """
-    Query Elasticsearch using Safe ID and campus to write back out with OwnerId.
     """
-
     with open(csv_filename) as csvfile:
         reader = csv.DictReader(csvfile)
 
@@ -57,7 +52,6 @@ def find_known_ignore(facebook_id):
 
     Returns True if a known non-alum-contact is found, else False.
     """
-
     s = Search().from_dict({
         "query": {
             "match": {

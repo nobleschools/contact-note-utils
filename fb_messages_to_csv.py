@@ -2,7 +2,11 @@
 fb_messages_to_csv.py
 
 Process a directory of html files of Facebook messages, saving them out to
-a csv to be uploaded by upload_contact_notes.py.
+a csv to be uploaded by upload_contact_notes.py. Works for Facebook message
+dump format as of April 2018.
+
+TODO: tests, ignore blank exchanges, tweak output for compatability with
+fb_names_to_sf_ids script, fb_utils repo?, etc.
 """
 
 import argparse
@@ -50,12 +54,10 @@ def process_fb_dump(messages_dir):
 
         for messages_file in os.listdir(messages_dir):
             filepath = os.path.abspath(os.path.join(messages_dir, messages_file))
-            # print(filepath)
             alum_fb_name, messages = parse_messages(filepath)
             if not messages:
                 continue
             for facebook_note in group_messages_into_notes(messages, alum_fb_name):
-                # print(contact_note)
                 writer.writerow(facebook_note._asdict())
 
 
@@ -141,7 +143,6 @@ def parse_messages(message_html_file):
         return None, messages
 
     alum_fb_name = participants.split(":")[1].strip()
-    # print(alum)
 
     message_divs = soup.select(".message")
     for m_div in message_divs:
@@ -153,7 +154,7 @@ def parse_messages(message_html_file):
             participant=user, datetime=msg_datetime,
             content=m_div.nextSibling.text
         ))
-        print(user, " @ ", msg_datetime,  " : ", m_div.nextSibling.text, "\n")
+        # print(user, " @ ", msg_datetime,  " : ", m_div.nextSibling.text, "\n")
 
     return alum_fb_name, messages
 
@@ -176,7 +177,6 @@ def get_nature_of_exchange(messages, alum_fb_name):
     found_alum_message = False
     initiated_by_alum = False
 
-    #print("messages passed to get_nature.. : {}".format(messages_list))
     if messages[0].participant.startswith(alum_fb_name):
         found_alum_message = True
         initiated_by_alum = True
