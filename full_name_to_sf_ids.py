@@ -2,18 +2,12 @@
 full_name_to_sf_ids.py
 
 Try to get Salesforce IDs from Elastic by querying for the alum full names.
-Write matches back out to csv.
+Write matches back out to csv. Expects a column headed by cn_fields.CONTACT
+('Contact__c').
 """
 
 import argparse
 import csv
-
-import sys
-from os import pardir, path
-filepath = path.abspath(__file__)
-parent_dir = path.abspath(path.join(filepath, pardir))
-package_dir = path.abspath(path.join(parent_dir, pardir))
-sys.path.insert(0, package_dir)
 
 from elasticsearch.helpers import scan as es_scan
 from elasticsearch_dsl.connections import connections as es_connections
