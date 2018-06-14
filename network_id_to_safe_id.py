@@ -7,13 +7,6 @@ Query Elasticsearch using Network ID and campus to write back out with Safe ID.
 import argparse
 import csv
 
-import sys
-from os import pardir, path
-filepath = path.abspath(__file__)
-parent_dir = path.abspath(path.join(filepath, pardir))
-package_dir = path.abspath(path.join(parent_dir, pardir))
-sys.path.insert(0, package_dir)
-
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.connections import connections as es_connections
 import requests
@@ -22,9 +15,9 @@ from simple_salesforce import Salesforce
 from full_name_to_sf_ids import _query_for_safe_id # TODO SF libs
 from salesforce_fields import contact_note as cn_fields
 from salesforce_fields import contact as contact_fields
-from salesforce_gen import salesforce_gen
+from salesforce_utils import salesforce_gen
 from secrets.elastic_secrets import ES_CONNECTION_KEY
-from secrets import salesforce_secrets
+import salesforce_secrets
 
 
 NETWORK_ID_HEADER = "Network Student ID" # column header in the csv
@@ -73,7 +66,13 @@ def write_safe_ids(csv_filename, campus):
 #                        full_name, campus, es_connection=es_connection
 #                    )
 #                else:
-                safe_id = network_to_safe_ids[network_id]
+                try:
+                    safe_id = network_to_safe_ids[network_id]
+                except KeyError:
+                    # despite the record existing properly in Elastic..
+                    # TODO debug
+                    print(f"Unable to match {network_id} to a Safe ID")
+                    safe_id = ""
 
                 row[cn_fields.CONTACT] = safe_id
                 writer.writerow(row)
@@ -130,7 +129,7 @@ if __name__=='__main__':
 
         sf_connection = Salesforce(
             username=sf_username,
-            password=salesforce_secrets.SF_PASSWORD,
+            password=salesforce_secrets.SF_LIVE_PASSWORD,
             security_token=sf_token,
             sandbox=args.sandbox,
         )
