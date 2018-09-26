@@ -33,11 +33,11 @@ def upload_contact_notes(input_file, source_date_format):
 
     COUNT_CONTACT_NOTES_QUERY = "SELECT COUNT() FROM Contact_Note__c"
     pre_uploads_count = \
-        sf_connection.query(COUNT_CONTACT_NOTES_QUERY)['totalSize']
+        sf_connection.query(COUNT_CONTACT_NOTES_QUERY)["totalSize"]
 
     skipped_count = created_count = 0
 
-    with open(input_file, 'r') as csvfile:
+    with open(input_file, "r") as csvfile:
         reader = csv.DictReader(csvfile)
 
         for row in reader:
@@ -78,7 +78,7 @@ def upload_contact_notes(input_file, source_date_format):
     logger.info(num_created=created_count, num_skipped=skipped_count)
 
     post_uploads_count = \
-        sf_connection.query(COUNT_CONTACT_NOTES_QUERY)['totalSize']
+        sf_connection.query(COUNT_CONTACT_NOTES_QUERY)["totalSize"]
     assert post_uploads_count == pre_uploads_count + created_count
 
 
@@ -91,19 +91,19 @@ def _upload_note(args_dict):
     """
 
     response = sf_connection.Contact_Note__c.create(args_dict)
-    if response['success']:
+    if response["success"]:
         logger.info(success=True, object_id=response["id"])
     else:
         logger.warn(success=False, error=response["errors"], attempted=args_dict)
-    return response['success']
+    return response["success"]
 
 
 def _string_to_bool(boolstring):
     """Convert string 'True'/'False' to python bool for Salesforce API call."""
     boolstring = boolstring.lower()
-    if boolstring == 'true':
+    if boolstring == "true":
         return True
-    elif boolstring == 'false':
+    elif boolstring == "false":
         return False
 
 
@@ -133,9 +133,9 @@ def check_for_existing_contact_note(datestring, alum_safe_id, subject):
     results = sf_connection.query(contact_note_query.format(
         datestring, alum_safe_id, subject
     ))
-    if results['totalSize']:
+    if results["totalSize"]:
         # may be more, but needs investigation either way
-        return results['records'][0]['Id']
+        return results["records"][0]["Id"]
     return None
 
 
