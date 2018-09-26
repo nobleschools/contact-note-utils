@@ -19,17 +19,17 @@ from salesforce_utils import (
     make_salesforce_datestr,
 )
 from header_mappings import HEADER_MAPPINGS
-from noble_logging_utils.papertrail_logger import (
+from noble_logging_utils.papertrail_struct_logger import (
     get_logger,
     SF_LOG_LIVE,
     SF_LOG_SANDBOX,
 )
 from salesforce_fields import contact_note as cn_fields
 
+SF_OBJECT_ACTION = "CREATE" # TODO make part of logging package?
 
 def upload_contact_notes(input_file, source_date_format):
     """Upload Contact Notes to Salesforce."""
-    logger.info("Starting Contact Note upload..")
 
     COUNT_CONTACT_NOTES_QUERY = "SELECT COUNT() FROM Contact_Note__c"
     pre_uploads_count = \
@@ -56,9 +56,7 @@ def upload_contact_notes(input_file, source_date_format):
             )
             if possible_dupe:
                 skipped_count += 1
-                logger.warn("Found possible duplicate ({}) for {}".format(
-                    possible_dupe, row
-                ))
+                logger.warn(success=False, duplicate_id=possible_dupe, **row)
                 continue
 
             # Initiated_by_alum__c; typical of Facebook note uploads
@@ -77,9 +75,7 @@ def upload_contact_notes(input_file, source_date_format):
             if was_successful:
                 created_count += 1
 
-    logger.info("{} notes uploaded, {} skipped".format(
-        created_count, skipped_count
-    ))
+    logger.info(num_created=created_count, num_skipped=skipped_count)
 
     post_uploads_count = \
         sf_connection.query(COUNT_CONTACT_NOTES_QUERY)['totalSize']
@@ -96,9 +92,9 @@ def _upload_note(args_dict):
 
     response = sf_connection.Contact_Note__c.create(args_dict)
     if response['success']:
-        logger.info("Uploaded Contact Note {} successfully".format(response['id']))
+        logger.info(success=True, object_id=response["id"])
     else:
-        logger.warn("Upload failed: {}. Kwargs: {}".format(response['errors'], **kwargs))
+        logger.warn(success=False, error=response["errors"], attempted=args_dict)
     return response['success']
 
 
@@ -184,13 +180,16 @@ if __name__=="__main__":
 
     if args.sandbox:
         logger = get_logger(log_job_name, hostname=SF_LOG_SANDBOX)
-        logger.info("Connecting to sandbox Salesforce instance..")
     else:
         logger = get_logger(log_job_name, hostname=SF_LOG_LIVE)
-        logger.info("Connecting to live Salesforce instance..")
+
+    logger = logger.bind(
+        event="upload_contact_notes",
+        sf_object=cn_fields.API_NAME,
+        action=SF_OBJECT_ACTION,
+    )
+    logger._logger.setLevel("INFO")
 
     sf_connection = get_salesforce_connection(sandbox=args.sandbox)
     upload_contact_notes(args.infile, source_date_format)
 
-    # ??
-    logger.handlers[0].close()
