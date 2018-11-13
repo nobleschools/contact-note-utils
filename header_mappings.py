@@ -33,6 +33,11 @@ HEADER_MAPPINGS = {
     "cn: date of communication": cn_fields.DATE_OF_CONTACT,
     "cn: communication status" : cn_fields.COMMUNICATION_STATUS,
     "cn: mode of communication": cn_fields.MODE_OF_COMMUNICATION,
+    # from fb message import
+    "date_of_contact"          : cn_fields.DATE_OF_CONTACT,
+    "mode_of_communication"    : cn_fields.MODE_OF_COMMUNICATION,
+    "communication_status"     : cn_fields.COMMUNICATION_STATUS,
+    "initiated_by_alum"        : cn_fields.INITIATED_BY_ALUM,
 }
 
 FB_NOTE_HEADERS = (
