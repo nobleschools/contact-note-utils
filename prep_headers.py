@@ -10,13 +10,7 @@ Converts the relevant headers (see salesforce_fields.contact_note).
 
 import argparse
 import csv
-
-import sys
-from os import pardir, path
-filepath = path.abspath(__file__)
-parent_dir = path.abspath(path.join(filepath, pardir))
-package_dir = path.abspath(path.join(parent_dir, pardir))
-sys.path.insert(0, package_dir)
+from os import path
 
 from header_mappings import HEADER_MAPPINGS
 
