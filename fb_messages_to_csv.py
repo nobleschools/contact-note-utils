@@ -1,9 +1,9 @@
 """
 fb_messages_to_csv.py
 
-Process a directory of html files of Facebook messages, saving them out to
-a csv to be uploaded by upload_contact_notes.py. Works for Facebook message
-dump format as of April 2018.
+Process a directory (of directories) of json  files of Facebook messages,
+saving them out to a csv to be uploaded by upload_contact_notes.py.
+Works for Facebook message dump format as of October 2018.
 
 TODO: tests, ignore blank exchanges, tweak output for compatability with
 fb_names_to_sf_ids script, fb_utils repo?, etc.
@@ -13,18 +13,17 @@ import argparse
 from collections import namedtuple
 import csv
 from datetime import datetime
+import json
 import os
-import sys
 
-from bs4 import BeautifulSoup as bs
-
-from header_mappings import FB_NOTE_HEADERS
 from salesforce_utils.constants import SALESFORCE_DATESTRING_FORMAT
 from salesforce_fields import contact_note as cn_fields
 
-# eg. Tuesday, November 22, 2016 at 10:36am CST
-SOURCE_DATETIME_FMT = "%A, %B %d, %Y at %I:%M%p %Z" # from FB dump
-CONVERSATION_TIME_FMT = "%I:%M%p"                   # for chat log
+
+MESSAGES_FILENAME = "message.json"
+SENDER_NAME = "sender_name"
+TIMESTAMP_MS = "timestamp_ms"
+CONTENT = "content"
 
 # Mode of Communication for all Facebook exchanges
 SOCIAL_NETWORKING_MOC = "Social Networking"
@@ -43,18 +42,19 @@ Message = namedtuple("Message", ["participant", "datetime", "content"])
 FacebookNote = namedtuple("FacebookNote", facebook_note_keys)
 
 def process_fb_dump(messages_dir):
-    """
-    Create a csv of Facebook messages from html files in messages_dir,
+    """Create a csv of Facebook messages from json files in messages_dir,
     grouped by alum by day.
     """
     with open("fb_messages.csv", "w") as fhand:
         writer = csv.DictWriter(fhand, fieldnames=facebook_note_keys)
         writer.writeheader()
-        # writer.writerow(facebook_note_keys)
 
-        for messages_file in os.listdir(messages_dir):
-            filepath = os.path.abspath(os.path.join(messages_dir, messages_file))
-            alum_fb_name, messages = parse_messages(filepath)
+        for conversation_folder in os.listdir(messages_dir):
+            msgs_filepath = os.path.abspath(os.path.join(
+                messages_dir, conversation_folder, MESSAGES_FILENAME
+            ))
+            alum_fb_name, messages = parse_messages(msgs_filepath)
+
             if not messages:
                 continue
             for facebook_note in group_messages_into_notes(messages, alum_fb_name):
@@ -72,14 +72,14 @@ def group_messages_into_notes(messages, alum_fb_name):
     messages = sorted(messages, key=lambda x: x.datetime)
     contact_notes = []
     same_day_batch = []
-    last_msg_date = messages[0].datetime.date()
+    last_seen_msg_date = messages[0].datetime.date()
     for message in messages:
-        if message.datetime.date() == last_msg_date:
+        if message.datetime.date() == last_seen_msg_date:
             same_day_batch.append(message)
             continue
         contact_notes.append(make_contact_note(same_day_batch, alum_fb_name))
         same_day_batch = [message]
-        last_msg_date = message.datetime.date()
+        last_seen_msg_date = message.datetime.date()
 
     # flush remaining
     contact_notes.append(make_contact_note(same_day_batch, alum_fb_name))
@@ -117,44 +117,38 @@ def make_contact_note(messages, alum_fb_name):
     return note
 
 
-def parse_messages(message_html_file):
-    """Open message_html_file and parse out messages.
+def parse_messages(message_json_file):
+    """Open message_json_file and parse out messages.
 
-    Returns None if a single, valid conversation participant is not found.
+    # Returns None if a single, valid conversation participant is not found.
 
-    :param message_html_file: str abs path to an html message file
+    :param message_json_file: str abs path to an json message file
     :return: str (presumed alumni's) name on Facebook, list of Message namedtuples
     :rtype: tuple
     """
     messages = []
 
-    with open(message_html_file, "r") as fhand:
-        soup = bs(fhand.read(), "html.parser")
+    with open(message_json_file, "r") as fhand:
+        msgs_dict = json.loads(fhand.read())
 
-    # participants string is between elements in the .thread div
-    thread_elements = soup.select(".thread")[0].children
-    participants = list(thread_elements)[1]
-    # ignore where >1 participant (group chat) or participant data not present
-    try:
-        if len(participants.split(",")) != 1:
-            return None, messages
-    except TypeError:
-        # rarely, files will be missing a participant altogether
-        return None, messages
+    num_participants = len(msgs_dict["participants"])
+    if num_participants != 2:
+        # haven't seen this yet but it was possible in previous formats...
+        print(f"WARNING: More than two participants found in a conversation: {msgs_dict['participants']}")
 
-    alum_fb_name = participants.split(":")[1].strip()
+    # seems reliable that first participant is the 'other'; ie. not the account
+    # that generated the messages download. Meaning that the second should
+    # always be the AC
+    alum_fb_name = msgs_dict["participants"][0]["name"]
 
-    message_divs = soup.select(".message")
-    for m_div in message_divs:
-        user = m_div.select(".user")[0].text.strip()
-        msg_datetime = m_div.select(".meta")[0].text.strip()
-        msg_datetime = convert_fb_time(msg_datetime)
-
+    for message in msgs_dict["messages"]:
+        message_sender = message[SENDER_NAME]
+        msg_datetime = convert_fb_time(message[TIMESTAMP_MS])
+        msg_content = message[CONTENT]
         messages.append(Message(
-            participant=user, datetime=msg_datetime,
-            content=m_div.nextSibling.text
+            participant=message_sender, datetime=msg_datetime,
+            content=msg_content
         ))
-        # print(user, " @ ", msg_datetime,  " : ", m_div.nextSibling.text, "\n")
 
     return alum_fb_name, messages
 
@@ -199,11 +193,17 @@ def get_nature_of_exchange(messages, alum_fb_name):
     return (str(initiated_by_alum), communication_status, subject)
 
 
-def convert_fb_time(datetime_str):
+def convert_fb_time(ms_timestamp):
+    """Converts the millisecond timestamp from facebook to a datetime object
+    after converting to POSIX seconds timestamp.
     """
-    Converts the datetime string from facebook to a python datetime object.
-    """
-    return datetime.strptime(datetime_str, SOURCE_DATETIME_FMT)
+    msg_datetime = datetime.fromtimestamp(ms_timestamp//1000)
+    # weak sanity check; this will happen after new years but I'd like to see
+    # if/when this occurs
+    if msg_datetime.year != datetime.today().year:
+        print(f"WARNING: FB message year doesn't match current year: {msg_datetime}")
+
+    return msg_datetime
 
 
 def parse_args():
@@ -218,6 +218,6 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     args = parse_args()
     process_fb_dump(args.messages_dir)
