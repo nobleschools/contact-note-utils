@@ -21,12 +21,14 @@ from salesforce_fields import contact_note as cn_fields
 
 
 MESSAGES_FILENAME = "message.json"
+MESSAGES_ENCODING = "latin_1"
 SENDER_NAME = "sender_name"
 TIMESTAMP_MS = "timestamp_ms"
 CONTENT = "content"
 
+# Lowercase versions of meta facebook messages that appear in conversation history.
 # These are just the irrelevant ones to ignore. There are others that we'll
-# leave in for now (eg. "You sent a photo", "You created the reminder Meeteup")
+# ignore for now (eg. "You sent a photo", "You created the reminder Meetup")
 # as they may provide context to the conversation
 LOWERCASE_FB_META_MESSAGES = (
     "you can now call each other and see information like active status and when you've read messages",
@@ -56,7 +58,7 @@ def process_fb_dump(messages_dir):
     """Create a csv of Facebook messages from json files in messages_dir,
     grouped by alum by day.
     """
-    with open("fb_messages.csv", "w") as fhand:
+    with open("fb_messages.csv", "w", encoding=MESSAGES_ENCODING) as fhand:
         writer = csv.DictWriter(fhand, fieldnames=facebook_note_keys)
         writer.writeheader()
 
