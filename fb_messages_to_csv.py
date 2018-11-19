@@ -25,6 +25,17 @@ SENDER_NAME = "sender_name"
 TIMESTAMP_MS = "timestamp_ms"
 CONTENT = "content"
 
+# These are just the irrelevant ones to ignore. There are others that we'll
+# leave in for now (eg. "You sent a photo", "You created the reminder Meeteup")
+# as they may provide context to the conversation
+LOWERCASE_FB_META_MESSAGES = (
+    "you can now call each other and see information like active status and when you've read messages",
+    "say hi to your new facebook friend,", # {first name}
+    "say hello to", # {first name}
+    "sent you an invite to join messenger",
+    "sent an attachment", # anecdotally, seen with the 'invite to join messenger' message
+)
+
 # Mode of Communication for all Facebook exchanges
 SOCIAL_NETWORKING_MOC = "Social Networking"
 
@@ -120,7 +131,9 @@ def make_contact_note(messages, alum_fb_name):
 def parse_messages(message_json_file):
     """Open message_json_file and parse out messages.
 
-    # Returns None if a single, valid conversation participant is not found.
+    Filters out LOWERCASE_FB_META_MESSAGES that aren't relevant to the
+    interaction. Others that could provide context will be kept
+    (eg. "You sent a photo", "You created the reminder Meetup", etc.).
 
     :param message_json_file: str abs path to an json message file
     :return: str (presumed alumni's) name on Facebook, list of Message namedtuples
@@ -144,11 +157,18 @@ def parse_messages(message_json_file):
     for message in msgs_dict["messages"]:
         message_sender = message[SENDER_NAME]
         msg_datetime = convert_fb_time(message[TIMESTAMP_MS])
+
         msg_content = message[CONTENT]
-        messages.append(Message(
-            participant=message_sender, datetime=msg_datetime,
-            content=msg_content
-        ))
+        is_meta_message = False
+        for message_to_ignore in LOWERCASE_FB_META_MESSAGES:
+            if message_to_ignore in msg_content.lower():
+                is_meta_message = True
+
+        if not is_meta_message:
+            messages.append(Message(
+                participant=message_sender, datetime=msg_datetime,
+                content=msg_content
+            ))
 
     return alum_fb_name, messages
 
