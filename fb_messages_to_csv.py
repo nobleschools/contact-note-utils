@@ -1,7 +1,7 @@
 """
 fb_messages_to_csv.py
 
-Process a directory (of directories) of json  files of Facebook messages,
+Process a directory (of directories) of json files of Facebook messages,
 saving them out to a csv to be uploaded by upload_contact_notes.py.
 Works for Facebook message dump format as of October 2018.
 
@@ -29,13 +29,14 @@ CONTENT = "content"
 # Lowercase versions of meta facebook messages that appear in conversation history.
 # These are just the irrelevant ones to ignore. There are others that we'll
 # ignore for now (eg. "You sent a photo", "You created the reminder Meetup")
-# as they may provide context to the conversation
+# as they may provide context to the conversation, or they're too general to
+# filter out (eg. "say hello to")
 LOWERCASE_FB_META_MESSAGES = (
     "you can now call each other and see information like active status and when you've read messages",
     "say hi to your new facebook friend,", # {first name}
-    "say hello to", # {first name}
     "sent you an invite to join messenger",
     "sent an attachment", # anecdotally, seen with the 'invite to join messenger' message
+    "is waving at you!",
 )
 
 # Mode of Communication for all Facebook exchanges
