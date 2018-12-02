@@ -12,6 +12,7 @@ from datetime import datetime
 FIELDS_TO_KEEP = (
     "Campus",
     "Network ID",
+    "Salesforce ID",
     "SFID",
     "Last",
     "First",
