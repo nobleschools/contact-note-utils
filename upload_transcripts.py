@@ -21,9 +21,9 @@ from noble_logging_utils.papertrail_logger import (
 )
 
 SF_ID_HEADER = "Contact__c"
-FILE_NO_HEADER = "File number"
-TRANSCRIPTS_DIR = path.abspath("albion_transcripts")
 NAME_HEADER = "Name"
+TRANSCRIPTS_DIR = path.abspath("dubuque_transcripts")
+TARGET_FILENAME = "Dubuque Transcript MAR-2019.pdf"
 
 
 def upload_transcripts(input_filename, sf_connection):
@@ -37,15 +37,13 @@ def upload_transcripts(input_filename, sf_connection):
 
         for row in reader:
             alum_sf_id = row[SF_ID_HEADER]
-            #file_number = row[FILE_NO_HEADER]
             alum_name = row[NAME_HEADER]
-            #attachment_filename = f"Noble 012018[1] {file_number}.pdf"
             attachment_filename = f"{alum_name}.pdf"
             filepath = path.join(TRANSCRIPTS_DIR, attachment_filename)
 
             result = push_attachment(
                 sf_connection, alum_sf_id, filepath,
-                target_filename="Albion Transcript JAN-2018.pdf"
+                target_filename=TARGET_FILENAME
             )
 
             print(result, alum_sf_id)
@@ -86,7 +84,7 @@ def push_attachment(sf_connection, object_id, filepath, target_filename=None):
 
 def parse_args():
     """
-    *    infile: input csv file, with Contact SF IDs and file number reference.
+    *    infile: input csv file, with Contact SF IDs and student Name
     * --sandbox: if present, connects to the sandbox Salesforce instance.
                  Otherwise, connects to live.
     """
@@ -117,5 +115,3 @@ if __name__ == "__main__":
     sf_connection = get_salesforce_connection(sandbox=args.sandbox)
     upload_transcripts(args.infile, sf_connection)
 
-    # ??
-    logger.handlers[0].close()
