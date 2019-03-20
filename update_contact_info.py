@@ -22,7 +22,7 @@ from salesforce_fields import contact as contact_fields
 # TODO parameterize
 FIELDS_TO_UPDATE = (
     contact_fields.COLLEGE_GPA,
-    contact_fields.PERSISTENCE_STATUS,
+    contact_fields.COLLEGE_CREDITS,
 )
 
 
@@ -49,6 +49,7 @@ def update_contact_info(input_file, sf_connection):
             # For the new_data, if a value is blank, remove the field
             # so as not to overwrite any existing data in Salesforce.
             new_data = _filter_data_dict(row, FIELDS_TO_UPDATE)
+            new_data = {k:v.strip() for k,v in new_data.items()}
             new_data = {k:v for k,v in new_data.items() if v != ''}
 
             # only log the fields for which updates were sent
