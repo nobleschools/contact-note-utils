@@ -19,13 +19,15 @@ This script is mainly meant for spreadsheets that have mutliple Contact Notes on
 import argparse
 import csv
 
+
 def handle_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "file",
-        help="The base file that contains sections of duplicate columns. Must be in csv format."
+        help="The base file that contains sections of duplicate columns. Must be in csv format.",
     )
     return parser.parse_args()
+
 
 def break_notes(filename):
     """The main function in this program.
@@ -37,22 +39,26 @@ def break_notes(filename):
     Args:
         filename: the name of the file to be used in the script.
     """
-    output_filename = 'merged_' + filename
+    output_filename = "merged_" + filename
     input_row_count = 0
     with open(filename, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
-        csv_w_file = open(output_filename, "w", newline='') 
+        csv_w_file = open(output_filename, "w", newline="")
         csv_writer = csv.writer(csv_w_file)
-        header_row_list = next(csv_reader)        
-        duplicate_col_start, duplicate_col_end = get_endpoints_of_duplicate_columns(header_row_list)
-        header_row_list = remove_duplicate_list_items(header_row_list)        
+        header_row_list = next(csv_reader)
+        duplicate_col_start, duplicate_col_end = get_endpoints_of_duplicate_columns(
+            header_row_list
+        )
+        header_row_list = remove_duplicate_list_items(header_row_list)
         csv_writer.writerow(header_row_list)
         for row in csv_reader:
-            write_rows(row,csv_writer,duplicate_col_start,duplicate_col_end)      
+            write_rows(row, csv_writer, duplicate_col_start, duplicate_col_end)
             input_row_count += 1
         csv_w_file.close()
         dup_col_num = len(header_row_list) - duplicate_col_start
-        check_that_output_rows_are_correct(input_row_count,output_filename, dup_col_num)  
+        check_that_output_rows_are_correct(
+            input_row_count, output_filename, dup_col_num
+        )
         print(f"Success! Your new file is called {output_filename}.")
 
 
@@ -108,13 +114,12 @@ def write_rows(row, csv_writer, duplicate_col_start, duplicate_col_end):
         elif column_index <= duplicate_col_end:
             duplicate_col_list.append(row_item)
             column_index += 1
-        else:                    
+        else:
             csv_writer.writerow(common_col_list + duplicate_col_list)
             duplicate_col_list = []
             duplicate_col_list.append(row_item)
             column_index = duplicate_col_start + 1
     csv_writer.writerow(common_col_list + duplicate_col_list)
-    
 
 
 def remove_duplicate_list_items(dup_list):
@@ -125,6 +130,7 @@ def remove_duplicate_list_items(dup_list):
 
     dup_list = list(dict.fromkeys(dup_list))
     return dup_list
+
 
 def check_that_output_rows_are_correct(input_rows, output_filename, dup_col_num):
     """Checks to make sure that the output file has the correct number of rows based on the input.
@@ -140,12 +146,14 @@ def check_that_output_rows_are_correct(input_rows, output_filename, dup_col_num)
         output_filename: The filename of the output file.
         dup_col_num: The number of times the duplicate columns in the input file were repeated.
     """
-    output_rows = -1 # starts at -1 to account for the header row
+    output_rows = -1  # starts at -1 to account for the header row
     output = open(output_filename, "r")
     output_check = csv.reader(output)
     for row in output_check:
         output_rows += 1
-    assert output_rows == (input_rows * dup_col_num), f"Error! The number of rows in the output file should be {input_rows * dup_col_num}, but it is {output_rows} instead."
+    assert output_rows == (
+        input_rows * dup_col_num
+    ), f"Error! The number of rows in the output file should be {input_rows * dup_col_num}, but it is {output_rows} instead."
     output.close()
 
 

@@ -1,17 +1,27 @@
+appdirs==1.4.3
 asn1crypto==0.24.0
+attrs==19.1.0
 beautifulsoup4==4.6.0
+black==19.3b0
 bs4==0.0.1
 certifi==2018.1.18
 cffi==1.11.4
 chardet==3.0.4
+Click==7.0
+colorama==0.4.1
 cryptography==2.3
 docutils==0.14
 elasticsearch==5.3.0
 elasticsearch-dsl==5.3.0
+entrypoints==0.3
+flake8==3.7.8
 idna==2.6
+mccabe==0.6.1
 -e git+https://github.com/noblenetworkcharterschools/noble-logging-utils.git@5624d5dadc594e803a674ae1fdbd71ecd2a999ae#egg=noble_logging_utils
 py==1.4.34
+pycodestyle==2.5.0
 pycparser==2.18
+pyflakes==2.1.1
 pyOpenSSL==17.5.0
 pytest==3.2.2
 python-dateutil==2.6.0
@@ -21,4 +31,5 @@ requests==2.20.1
 simple-salesforce==0.73.0
 six==1.11.0
 structlog==18.2.0
+toml==0.10.0
 urllib3==1.24.2
