@@ -30,7 +30,7 @@ def clean_headers(source_file):
         ))
         reader.fieldnames = target_headers # else it can't map back out
 
-        with open(output_filename, 'w') as output_csv:
+        with open(output_filename, 'w', newline='') as output_csv:
             writer = csv.DictWriter(output_csv, target_headers)
             writer.writeheader()
 
