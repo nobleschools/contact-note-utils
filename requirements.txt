@@ -18,7 +18,7 @@ flake8==3.7.8
 idna==2.6
 mccabe==0.6.1
 -e git+https://github.com/noblenetworkcharterschools/noble-logging-utils.git@5624d5dadc594e803a674ae1fdbd71ecd2a999ae#egg=noble_logging_utils
-py==1.4.34
+py==1.10.0
 pycodestyle==2.5.0
 pycparser==2.18
 pyflakes==2.1.1
